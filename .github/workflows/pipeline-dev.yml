@@ -1,0 +1,21 @@
+name: Pipeline - development
+
+on: workflow_dispatch
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-dev:
+    uses: ./.github/workflows/cdk-deploy.yml
+    secrets: inherit
+    with:
+      account-id: "316524324729"
+      role: "GithubActionsRole"
+      environment: dev
+      caspian-id: 8r8qy5fgr9

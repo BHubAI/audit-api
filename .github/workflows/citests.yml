@@ -1,0 +1,44 @@
+name: citests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+
+    - name: Cache deps
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.pythonLocation }}
+        key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('requirements/ci.txt') }}
+
+    - name: Setup python
+      run: |
+        curl -sS https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        python get-pip.py --force-reinstall
+        pip install -r requirements/ci.txt
+        cp .env.test .env
+
+    - name: Run tests
+      run: |
+        coverage run -m pytest -vv tests/
+        coverage xml
+
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+

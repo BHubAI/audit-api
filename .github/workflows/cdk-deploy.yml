@@ -1,0 +1,70 @@
+name: CDK Deploy Reusable Workflow
+
+on:
+  workflow_call:
+    inputs:
+      account-id:
+        description: Target AWS Account Id
+        required: true
+        type: string
+      role:
+        description: Role name to be assumed by aws-configure action
+        required: true
+        type: string
+      environment:
+        description: The environment which the application is running
+        required: true
+        type: string
+        default: dev
+      caspian-id:
+        description: The environment which the caspian is running
+        required: true
+        type: string
+        default: dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - id: iam
+        run: |
+          echo "AccountId=${{ inputs.account-id }}" >> $GITHUB_OUTPUT
+          echo "Role=${{ inputs.role }}" >> $GITHUB_OUTPUT
+      - uses: ./.github/actions/bhub-aws-credentials
+        with:
+          role-for-oidc: arn:aws:iam::100154399918:role/SharedGithubOIDCAccessRole
+          role-to-assume: arn:aws:iam::${{ steps.iam.outputs.AccountId }}:role/${{ steps.iam.outputs.Role }}
+          aws-region: us-east-1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install CodeArtifact Credential Helper
+        run: pip install awscli
+
+      - name: Authenticate to CodeArtifact
+        run: |
+          CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain bhub --domain-owner 100154399918 --query authorizationToken --output text)
+          pip config set global.extra-index-url https://aws:$CODEARTIFACT_AUTH_TOKEN@bhub-100154399918.d.codeartifact.us-east-1.amazonaws.com/pypi/bhub-cdk/simple/
+
+      - name: Install Python Dependencies
+        run: pip install -r requirements/deploy.txt
+
+      - name: Install CDK
+        run: npm install -g aws-cdk
+
+      - name: CDK Deploy
+        run: |
+          cdk deploy --require-approval never \
+            --parameters CaspianApiId=${{ inputs.caspian-id }}
