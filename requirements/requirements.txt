@@ -1,0 +1,16 @@
+fastapi==0.115.4
+dependency-injector==4.43.0
+sqlalchemy==2.0.36 # https://github.com/sqlalchemy/sqlalchemy
+pymysql==1.1.1 # https://github.com/PyMySQL/PyMySQL/
+pydantic==2.9.2 # https://github.com/pydantic/pydantic
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+python-dateutil==2.9.0.post0 # https://github.com/dateutil/dateutil
+mangum==0.19.0 # https://github.com/jordaneremieff/mangum˜
+boto3==1.35.28 # https://github.com/boto/boto3
+lambda-warmer-py==0.6.0 # https://github.com/robhowley/lambda-warmer-py
+awslambdaric==2.2.1 # https://github.com/aws/aws-lambda-python-runtime-interface-client
+datadog-lambda==5.86.0 # https://github.com/DataDog/datadog-lambda-python
+alembic==1.14.0 # https://github.com/sqlalchemy/alembic/
+python-jose==3.3.0
+opensearch-py==2.7.1

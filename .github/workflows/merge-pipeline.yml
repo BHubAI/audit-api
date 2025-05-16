@@ -1,0 +1,20 @@
+name: Pipeline (Merge)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  cd:
+    uses: BHubAI/shared-workflows/.github/workflows/cd-python.yml@v1.1.0
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      PythonVersion: '3.11'
+      AccountIdDev: '316524324729'
+      AccountIdProd: '590183851380'
+      Role: GithubActionsRole
+      TestFolder: './tests/unit'
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
