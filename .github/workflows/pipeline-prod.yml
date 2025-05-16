@@ -1,0 +1,24 @@
+name: Pipeline - production
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-prod:
+    uses: ./.github/workflows/cdk-deploy.yml
+    secrets: inherit
+    with:
+      account-id: "590183851380"
+      role: GithubActionsRole
+      environment: prod
+      caspian-id: gbdxz6y864
